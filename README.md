@@ -1,102 +1,49 @@
-# Telegram-розсилка
+# Telegram broadcast bot
 
-Бот для розсилки і відкладеного постингу в групи, канали і приватні чати. Є адмін-панель зі статистикою і окремий публічний бот.
+An admin bot that sends one message to many chats and can repeat that post on a timer. Interface languages are Arabic and English.
 
-**Стек.** Python, Telegram.
+## Problem
 
-Публічний кейс. Робоча копія з паролями і базами лишається локально і сюди не входить.
+A channel owner was copying the same post into groups, private chats, and channels, then had no count of how many deliveries failed because the user had blocked the bot.
 
----
+## What was built
 
-# Telegram Broadcast Bot (بوتي)
+Two entry points share the project: a personal admin bot and a public bot.
 
-Telegram bot for mass broadcasting and automatic posting to groups, private chats, and channels.
+Admin panel:
 
-Based on reference bot [@sftsfdrtghbot](https://t.me/sftsfdrtghbot) with added auto-post scheduling.
+- Daily statistics.
+- Broadcast as a new message or as a forward.
+- Audience filter: everyone, only groups and channels, or only private chats.
+- Text, photo, video, document, audio, voice, and sticker.
+- Live progress and a Stop button.
+- A closing report: sent, blocked, failed, speed, success rate.
+- A notice to the admin when someone new starts the bot.
 
-## Features
+Scheduling added on top of that:
 
-### From reference bot
-- Admin control panel with daily statistics
-- Broadcast menu (Direct message / Forward message)
-- Audience targeting: All / Groups & Channels / Private only
-- Media support: text, photos, videos, documents, audio, voice, stickers
-- Live broadcast progress with Stop button
-- Completion report (sent, blocked, failed, speed, success %)
-- New user notifications to admin
-- Arabic + English interface with language switch
+- Repeat every 1, 3, 5, 15, or 30 minutes, or every hour.
+- Target groups only, private chats only, or all.
+- Turn the schedule on or off and replace the content, interval, or target without recreating the bot.
 
-### Additional (client requirements)
-- Auto-post at intervals: 1, 3, 5, 15, 30 minutes, 1 hour
-- Auto-post targets: Groups only / Private only / All
-- Enable/disable auto-post, change content/interval/target anytime
+## How it works
 
-## Setup
+The admin opens the broadcast menu, picks direct or forward, picks the audience, and sends the payload. The bot walks the stored chats, updates a progress message, and can be stopped mid-run. Auto-post stores the last payload plus an interval and a target, then a loop publishes it until the admin disables it. Shell helpers in the repo (`run-personal.sh`, `run-public.sh`, `deploy.sh`) are for the two processes and a VPS install. Deploy archives were left out of this public copy.
 
-### 1. Create bot
-1. Open [@BotFather](https://t.me/BotFather) in Telegram
-2. Send `/newbot` and follow instructions
-3. Copy the bot token
+## Stack
 
-### 2. Get your Telegram ID
-1. Open [@userinfobot](https://t.me/userinfobot)
-2. Copy your numeric user ID
+Python, Telegram Bot API.
 
-### 3. Configure
+## Run locally
+
 ```bash
 cp .env.example .env
-```
-
-Edit `.env`:
-```env
-BOT_TOKEN=your_token_here
-ADMIN_ID=your_telegram_id
-DEFAULT_LANGUAGE=ar
-DATABASE_PATH=bot.db
-```
-
-### 4. Install & run
-```bash
 python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python -m bot.main
+venv/bin/pip install -r requirements.txt
 ```
 
-## Usage
+Create the bot in BotFather, put the token and your numeric admin id in `.env`, then start the personal or public runner.
 
-1. Start the bot: `/start` (as admin you see the control panel)
-2. Add the bot to groups/channels (give it permission to send messages)
-3. **Manual broadcast:** Broadcast → method → audience → send content
-4. **Auto-post:** Auto Post → Enable → interval → target → send content
+## What this public copy leaves out
 
-## Project structure
-
-```
-bot/
-  main.py              # Entry point
-  config.py            # Environment config
-  database/db.py       # SQLite storage
-  handlers/            # Command & callback handlers
-  keyboards/inline.py  # Inline keyboards
-  locales/             # Arabic & English texts
-  services/            # Broadcast engine & scheduler
-  filters/admin.py     # Admin access filter
-```
-
-## Deploy (VPS)
-
-Run with systemd or screen/tmux so the bot stays online 24/7:
-
-```bash
-screen -S broadcast-bot
-source venv/bin/activate
-python -m bot.main
-# Ctrl+A, D to detach
-```
-
-## Notes
-
-- Telegram may rate-limit or restrict bots used for mass messaging
-- Bot can only post where it has been added with send permissions
-- Keep your `.env` file secret — never commit it to git
+`.env`, `.env.public`, virtualenv, and the tar archives that were used to ship the bot to a server.
