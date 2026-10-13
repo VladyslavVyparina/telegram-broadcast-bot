@@ -47,3 +47,8 @@ Create the bot in BotFather, put the token and your numeric admin id in `.env`, 
 ## What this public copy leaves out
 
 `.env`, `.env.public`, virtualenv, and the tar archives that were used to ship the bot to a server.
+
+## Documents
+
+- `BOTS.md` separates the owner bot (`bot/`, no Stars) from the platform (`bot_public/`), which sells a copy of the owner bot.
+- `BOT_PUBLIC_TZ.md` is the platform specification: Arabic and English, a BotFather token after a Stars payment, a private database per copy, a 30-day stop, a one-day reminder, and analytics limited to the owner ids. Live account ids are not listed in that file.

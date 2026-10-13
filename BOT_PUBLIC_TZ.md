@@ -1,149 +1,120 @@
-# ТЗ: Платформний бот `bot_public` (творець ботів для автопостингу)
+# Specification: platform bot `bot_public`
 
-## 1. Мета
+## 1. Purpose
 
-`bot_public` — **окремий** Telegram-бот (не копія основного в одному процесі).  
-Користувачі через нього **створюють власних ботів** з функціоналом як у основного `bot/` (автопостинг, контент, розсилки тощо).
+`bot_public` is a separate Telegram bot. It is not a second copy of the main bot inside the same process.
 
-Основний бот `bot/` — для власного використання власника, без цього функціоналу.
+Through it, a user creates their own bot with the same autopost, content, and broadcast behavior as `bot/`.
 
----
+`bot/` is the owner’s own bot. It does not sell copies.
 
-## 2. Мови
+## 2. Languages
 
-- **Арабська** (за замовчуванням)
-- **Англійська**
-- При `/start` — вибір мови (або кнопка «🌐 اللغة / Language» у меню)
-- Усі тексти платформи — обидві мови
+- Arabic by default
+- English
+- `/start` asks for a language, and the menu has a language button
+- Every platform string exists in both languages
 
----
+## 3. User path
 
-## 3. Сценарій користувача
+### 3.1 First open
 
-### 3.1 Перший вхід
+A welcome that names the person, says they can create a private autopost bot with the same features as the main bot, and offers a monthly subscription.
 
-Повідомлення (приклад, AR):
+Buttons:
 
-> مرحباً **{ім'я}** في منصة إنشاء بوتات النشر التلقائي.
->
-> يمكنك إنشاء بوت خاص بك للنشر التلقائي — بنفس إمكانيات البوت الرئيسي.
->
-> 🤖 أعجبك البوت؟ أنشئ نسختك الخاصة باشتراك شهري.
+- Create an autopost bot
+- My bots
+- Language
 
-Кнопки:
-- **إنشاء بوت للنشر التلقائي** / **Create autopost bot**
-- **بوتاتي** / **My bots**
-- **🌐 اللغة** / **Language**
+### 3.2 Creating a bot
 
-### 3.2 Створення бота
+1. The user presses Create.
+2. The bot tells them to create a bot in BotFather and copy the token.
+3. They pay in Telegram Stars. The default is 100 stars for one month. The platform owner can change both numbers.
+4. After payment they send the token.
+5. The platform calls `getMe`, stores the bot, and starts a copy of the main feature set with its own database.
+6. The user receives the `@username` of their bot.
 
-1. Користувач натискає «Створити бота».
-2. Інструкція: створити бота в [@BotFather](https://t.me/BotFather), скопіювати **токен**.
-3. Оплата **Telegram Stars** (за замовчуванням **100⭐**, термін **1 місяць** — налаштовує власник платформи).
-4. Після оплати — надіслати **токен** бота.
-5. Система перевіряє токен (`getMe`), зберігає бота, **запускає копію** основного функціоналу з окремою БД.
-6. Користувач отримує посилання на свого бота: `@username`.
+### 3.3 When the subscription ends
 
-### 3.3 Закінчення підписки
+- After one month (30 days, changeable by an admin) the copy stops.
+- People who open the copy can no longer use it.
+- Under My bots the owner sees an expired status and a Renew button. Paying again extends the term and starts the copy.
 
-- Після **1 місяця** (30 днів, адмін може змінити) бот-копія **зупиняється**.
-- Користувачі копії не можуть нею користуватися.
-- Власник у «Мої боти» бачить статус «закінчився» і кнопку **Поновити** → знову оплата Stars → термін продовжується, бот знову запускається.
+The client conversation mentioned both “one month of work” and “pay every two months”. Confirm whether one payment buys 30 or 60 days before you treat the default as final.
 
-### 3.4 Нагадування
+A renewal while the subscription is still active adds days to the current end date. The currency is Telegram Stars (XTR).
 
-- За **1 день** до закінчення — повідомлення власнику (AR/EN) з кнопкою поновлення.
+### 3.4 Reminder
 
----
+One day before the end, the owner gets a message in Arabic and English with a renew button.
 
-## 4. Оплата
+## 4. Payment defaults
 
-| Параметр | За замовчуванням | Хто змінює |
-|----------|------------------|------------|
-| Ціна (⭐) | 100 | Тільки власники платформи (див. п. 6) |
-| Термін | 1 місяць (30 днів) | Тільки власники платформи |
+| Setting | Default | Who changes it |
+|---|---|---|
+| Price in stars | 100 | Platform owners only |
+| Term | 30 days | Platform owners only |
 
-**Уточнення для клієнта:** у переписці згадано «1 місяць роботи» і «оплата кожні 2 місяці» — потрібно підтвердити: **30 чи 60 днів** за одну оплату.
+## 5. Platform administration
 
-- Повторна оплата **додає** дні до поточного терміну, якщо підписка ще активна.
-- Валюта: **Telegram Stars (XTR)**.
+### Who is an admin
 
----
+The same Telegram user ids as the owner bot. Store them in the environment. This repository does not list live account ids.
 
-## 5. Адміністрування платформи
+### Rights
 
-### 5.1 Хто адмін
+| Action | Ordinary user | Admin in `bot_admins` | The owner ids |
+|---|---|---|---|
+| Create or renew a bot with Stars | yes | yes | yes |
+| Platform analytics | no | no | yes |
+| Change price or term | no | no | yes |
 
-Ті самі ID, що й раніше:
+### Analytics
 
-- `865883330`
-- `8734758541`
-- `929743223`
+- Bots created, active, and expired
+- Revenue today and in total, in stars
+- Recent purchases: who, how many stars, for how many days, which bot
+- A notice to the platform owners on every purchase
 
-### 5.2 Права
-
-| Дія | Звичайний користувач | Адмін з `bot_admins` | Власники (3 ID) |
-|-----|---------------------|----------------------|-----------------|
-| Створити / поновити бота (Stars) | ✅ | ✅ | ✅ |
-| Панель аналітики платформи | ❌ | ❌ | ✅ |
-| Змінити ціну / термін підписки | ❌ | ❌ | ✅ |
-
-### 5.3 Аналітика (як у основному боті)
-
-- Скільки ботів створено / активних / прострочених
-- Дохід сьогодні / загалом (⭐)
-- Список останніх покупок: **хто**, **скільки ⭐**, **на скільки місяців/днів**, **який бот**
-- Сповіщення власникам платформи при **кожній покупці**
-
----
-
-## 6. Технічна архітектура
+## 6. Layout
 
 ```
 BOT_automatical/
-├── bot/              ← основний функціонал (автопост, адмін-панель копії)
-├── bot_public/       ← платформа (оплата, створення, аналітика)
-└── data/clones/      ← окремі БД для кожної копії
+├── bot/              owner feature set, also the code each copy runs
+├── bot_public/       platform: payment, creation, analytics
+└── data/clones/      one database per copy
 ```
 
-- Один процес `bot_public.main`: поллінг **платформи** + **усіх активних копій** (asyncio).
-- Кожна копія: свій `BOT_TOKEN`, своя `*.db`, `admin_id` = власник копії.
-- Код копії — пакет `bot/` (без оплати всередині копії).
+One process, `bot_public.main`, polls the platform and every active copy. Each copy has its own `BOT_TOKEN`, its own database, and `admin_id` equal to the copy’s owner. The copy runs the `bot/` package. Payment lives only on the platform.
 
----
+## 7. Screens
 
-## 7. Екрани платформи (коротко)
+| Screen | Contents |
+|---|---|
+| Language | Arabic or English |
+| Home | Greeting and the three buttons |
+| Create | Instructions, then payment, then the token |
+| My bots | List, status, days left, renew |
+| Admin | Statistics, recent purchases, price and term |
 
-| Екран | Опис |
-|-------|------|
-| Вибір мови | AR / EN |
-| Головна | Вітання + кнопки |
-| Створити бота | Інструкція → оплата → токен |
-| Мої боти | Список, статус, днів залишилось, поновити |
-| Адмін | Статистика, останні покупки, ціна/термін |
+## 8. Out of scope for `bot_public`
 
----
+- The full admin panel of the owner bot (autopost, content). That is inside the copy.
+- Payment inside a copy. There is none.
 
-## 8. Що НЕ входить у `bot_public`
+## 9. Build order
 
-- Повна адмін-панель основного бота (автопост, контент тощо) — це в **копії** (`bot/`).
-- Оплата всередині копії — **немає** (тільки на платформі).
+1. This specification
+2. Rewrite `bot_public` as the platform plus Stars
+3. Start copies through `ChildManager`
+4. Admin analytics and purchase notices
+5. The one-day reminder
+6. Deploy on the VPS and run `python3 -m bot_public.main`
 
----
+## 10. Open questions for the client
 
-## 9. Етапи розробки
-
-1. ✅ ТЗ (цей документ)
-2. Перепис `bot_public` — платформа + оплата Stars
-3. Запуск копій через `ChildManager`
-4. Адмін-аналітика + сповіщення
-5. Нагадування за 1 день
-6. Деплой на VPS (`/root/BOT_automatical`, `python3 -m bot_public.main`)
-
----
-
-## 10. Питання до клієнта
-
-1. Термін підписки: **30** чи **60** днів за одну оплату?
-2. Чи може один користувач мати **кілька** ботів-копій?
-3. Чи потрібна **безкоштовна пробна** версія (наприклад, 3 дні)?
+1. Is one payment 30 days or 60?
+2. May one user own several copies?
+3. Is a free trial required, for example three days?

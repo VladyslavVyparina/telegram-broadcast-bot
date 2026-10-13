@@ -1,31 +1,29 @@
-# Два боти
+# Two bots
 
-## `bot/` — основний (ваш особистий)
-- Повний функціонал автопостингу
-- Без оплати Stars
-- `python3 -m bot.main`
+## `bot/` — the owner’s bot
 
-## `bot_public/` — платформа (творець ботів)
-- Користувачі платять Stars і створюють **власну копію** `bot/`
-- Мови: **арабська + англійська**
-- ТЗ: [BOT_PUBLIC_TZ.md](BOT_PUBLIC_TZ.md)
-- Запуск з кореня проєкту:
+- The full autopost feature set
+- No Telegram Stars charge
+- Start with `python3 -m bot.main`
+
+## `bot_public/` — the platform that creates bots
+
+- A user pays in Stars and gets their own copy of `bot/`
+- Languages: Arabic and English
+- The specification is [BOT_PUBLIC_TZ.md](BOT_PUBLIC_TZ.md)
+- From the project root, with the public env file loaded:
 
 ```bash
-cd /root/BOT_automatical
-source venv/bin/activate
 set -a && source .env.public && set +a
-screen -dmS bot-public python3 -m bot_public.main
+python3 -m bot_public.main
 ```
 
-Адміни платформи (ціна/аналітика): `865883330`, `8734758541`, `929743223`
+Platform admin ids belong in `.env.public`, not in this page. The working copy named three numeric Telegram ids; set those only on the server.
 
-## Telegram Stars (оплата)
+## Telegram Stars
 
-Зірки **не зникають** — вони на балансі бота **@Ni_iF7Fibot** у Telegram.
+Stars stay on the bot’s balance inside Telegram. This code cannot transfer Stars to a personal account. Only Telegram does that, and only the BotFather owner of that bot sees the balance.
 
-- Код **не може** перевести Stars на особистий акаунт за ID — це робить лише Telegram.
-- Баланс бачить **власник бота в BotFather** (акаунт, який створив `@Ni_iF7Fibot`).
-- Щоб Stars отримував ID `929743223` — цей акаунт має бути власником бота в BotFather.
-- Перегляд: BotFather → `/mybots` → `Ni_iF7Fibot` → **Balance**
-- У `.env.public`: `STARS_OWNER_ID=929743223` (сповіщення про оплати)
+BotFather, `/mybots`, the platform bot, Balance.
+
+`STARS_OWNER_ID` in `.env.public` is who receives the payment notice. For that person to receive the Stars themselves, that account has to be the bot owner in BotFather.
